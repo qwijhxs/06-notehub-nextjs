@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "../components/Header/Header";
+
+import TanStackProvider from "@/components/TanStackProvider/TanstackProvider";
+import Header from "@/components/Header/Header";
+import Footer from "@/components/Footer/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NoteHub",
-  description: "A platform for note-taking and organization",
+  title: "HW №6"
 };
 
 export default function RootLayout({
@@ -26,15 +28,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <div className="min-h-screen flex flex-col">
+        <TanStackProvider>
           <Header />
-          <main className="flex-grow">{children}</main>
-          <footer className="py-4 text-center">
-            <p>
-              Created <time dateTime='2025'>2025</time>
-            </p>
-          </footer>
-        </div>
+          <main>
+            {children}
+          </main>
+          <Footer />
+        </TanStackProvider>
       </body>
     </html>
   );
