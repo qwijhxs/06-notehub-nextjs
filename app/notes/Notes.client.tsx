@@ -4,7 +4,7 @@ import css from "./page.module.css";
 
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { fetchNotes } from "@/lib/api";
 
@@ -18,12 +18,23 @@ import SearchBox from "@/components/SearchBox/SearchBox";
 
 export default function NotesClient() {
     const [query, setQuery] = useState<string>("");
+    const [debouncedQuery, setDebouncedQuery] = useState<string>("");
     const [page, setPage] = useState<number>(1);
     const [isModalOpened, setIsModalOpened] = useState<boolean>(false);
 
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedQuery(query);
+            setPage(1);
+        }, 500);
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [query]);
+
     const { data, isLoading, isError } = useQuery({
-        queryKey: ["notes", query, page],
-        queryFn: () => fetchNotes(query, page),
+        queryKey: ["notes", debouncedQuery, page],
+        queryFn: () => fetchNotes(debouncedQuery, page),
         placeholderData: keepPreviousData,
         refetchOnMount: false
     });
@@ -31,10 +42,9 @@ export default function NotesClient() {
     const notes: Note[] = data?.notes ?? [];
     const totalPages: number = data?.totalPages ?? 0;
 
-    const handleChange = (value: string): void => {
+    const handleChange = useCallback((value: string): void => {
         setQuery(value);
-        setPage(1);
-    };
+    }, []);
 
     const handleClose = (): void => {
         setIsModalOpened(false);
@@ -50,7 +60,7 @@ export default function NotesClient() {
                 />
               </Modal>
           }
-	        <header className={css.toolbar}>
+          <header className={css.toolbar}>
             <SearchBox
               searchTextValue={query}
               onChange={handleChange}
